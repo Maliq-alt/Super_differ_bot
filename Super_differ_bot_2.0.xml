@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<bot>
+  <variables>
+    <variable name="initial_stake" type="number" value="0.35" />
+    <variable name="balance" type="number" value="1000" />
+    <variable name="loss_count" type="number" value="0" />
+    <variable name="take_profit" type="number" value="20" />
+    <variable name="stop_loss" type="number" value="10" />
+    <variable name="current_stake" type="number" value="0.35" />
+    <variable name="profit" type="number" value="0" />
+  </variables>
+  <trade_logic>
+    <contract type="digits" subtype="differ" stake="${current_stake}" duration="1" duration_unit="t" barrier="1" />
+  </trade_logic>
+  <after_purchase>
+    <if condition="trade_won">
+      <set var="current_stake" value="${initial_stake}" />
+      <set var="loss_count" value="0" />
+      <set var="profit" value="${profit} + ${payout} - ${current_stake}" />
+    </if>
+    <if condition="trade_lost">
+      <set var="current_stake" value="${current_stake} * 2" />
+      <set var="loss_count" value="${loss_count} + 1" />
+      <set var="profit" value="${profit} - ${current_stake}" />
+    </if>
+  </after_purchase>
+  <check_end>
+    <if condition="profit >= take_profit">
+      <action type="stop" reason="Take profit reached" />
+    </if>
+    <if condition="profit <= -stop_loss">
+      <action type="stop" reason="Stop loss reached" />
+    </if>
+  </check_end>
+</bot>
